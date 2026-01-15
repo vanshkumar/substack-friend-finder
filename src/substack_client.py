@@ -14,7 +14,7 @@ from .cache import cache
 from .types import Newsletter, UserProfile
 
 # Rate limiting
-MIN_REQUEST_INTERVAL = 1.0  # seconds between requests
+MIN_REQUEST_INTERVAL = 2.0  # seconds between requests
 _last_request_time = 0.0
 
 BASE_URL = "https://substack.com/api/v1"

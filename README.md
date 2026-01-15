@@ -15,25 +15,13 @@ Find people with similar interests based on overlap in Substack newsletter subsc
 ### 1. Install dependencies
 
 ```bash
-pip install playwright rich requests
+pip install playwright rich requests browser_cookie3
 python -m playwright install chromium
 ```
 
-### 2. Get your Substack session cookies
+### 2. Log into Substack
 
-The tool needs your Substack session to access subscriber lists.
-
-1. Log into Substack in your browser
-2. Open Developer Tools (F12) → Application → Cookies → substack.com
-3. Copy the value of `substack.sid`
-4. Create `~/.substack-cookies.json`:
-
-```json
-{
-  "substack.sid": "your_session_id_here",
-  "substack.lli": "1"
-}
-```
+Just log into Substack in Firefox, Chrome, or Safari. The tool automatically pulls cookies from your browser - no manual setup needed.
 
 ## Usage
 

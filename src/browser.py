@@ -7,18 +7,19 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page
+from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page, Playwright
 
 from .cache import cache
 from .types import Newsletter, UserProfile
 
 # Browser instance (reused across calls)
+_playwright: Optional[Playwright] = None
 _browser: Optional[Browser] = None
 _context: Optional[BrowserContext] = None
 _page: Optional[Page] = None
 
 # Rate limiting
-MIN_REQUEST_INTERVAL = 1.5  # seconds between requests
+MIN_REQUEST_INTERVAL = 3.0  # seconds between requests
 _last_request_time = 0.0
 
 
@@ -31,38 +32,64 @@ def _rate_limit() -> None:
     _last_request_time = time.time()
 
 
+def _get_browser_cookies() -> List[Dict]:
+    """Get Substack cookies from user's browser (Firefox, Chrome, Safari)."""
+    try:
+        import browser_cookie3
+    except ImportError:
+        print("browser_cookie3 not installed. Run: pip install browser_cookie3")
+        return []
+
+    cookies = []
+
+    # Try browsers in order: Firefox, Chrome, Safari
+    browsers = [
+        ("Firefox", browser_cookie3.firefox),
+        ("Chrome", browser_cookie3.chrome),
+        ("Safari", browser_cookie3.safari),
+    ]
+
+    for name, browser_fn in browsers:
+        try:
+            cj = browser_fn(domain_name=".substack.com")
+            for c in cj:
+                cookies.append({
+                    "name": c.name,
+                    "value": c.value,
+                    "domain": ".substack.com",
+                    "path": c.path or "/",
+                })
+            if cookies:
+                print(f"Loaded {len(cookies)} cookies from {name}")
+                return cookies
+        except Exception as e:
+            # Silently try next browser
+            pass
+
+    return cookies
+
+
 def init_browser(cookies_file: Optional[str] = None) -> bool:
     """
-    Initialize the browser with Substack session cookies.
+    Initialize the browser with cookies from user's existing browser session.
 
-    Args:
-        cookies_file: Path to cookies JSON file. If None, looks for ~/.substack-cookies.json
+    Automatically pulls cookies from Firefox/Chrome/Safari.
 
     Returns:
         True if browser initialized successfully
     """
-    global _browser, _context, _page
+    global _playwright, _browser, _context, _page
 
-    # Find cookies file
-    if cookies_file:
-        cookie_path = Path(cookies_file)
-    else:
-        cookie_path = Path.home() / ".substack-cookies.json"
-
-    if not cookie_path.exists():
-        print(f"Cookies file not found: {cookie_path}")
+    # Get cookies from user's browser
+    cookies = _get_browser_cookies()
+    if not cookies:
+        print("Could not get cookies from any browser.")
+        print("Make sure you're logged into Substack in Firefox, Chrome, or Safari.")
         return False
 
-    try:
-        with open(cookie_path) as f:
-            cookies_data = json.load(f)
-    except Exception as e:
-        print(f"Error reading cookies: {e}")
-        return False
-
-    # Start browser (non-headless to handle Cloudflare better)
-    playwright = sync_playwright().start()
-    _browser = playwright.chromium.launch(
+    # Start browser
+    _playwright = sync_playwright().start()
+    _browser = _playwright.chromium.launch(
         headless=False,  # Cloudflare detects headless browsers
         args=['--disable-blink-features=AutomationControlled']
     )
@@ -71,41 +98,48 @@ def init_browser(cookies_file: Optional[str] = None) -> bool:
         viewport={"width": 1280, "height": 720},
     )
 
-    # Convert cookies to Playwright format
-    playwright_cookies = []
-    for name, value in cookies_data.items():
-        playwright_cookies.append({
-            "name": name,
-            "value": value,
-            "domain": ".substack.com",
-            "path": "/",
-        })
-
-    _context.add_cookies(playwright_cookies)
+    # Add cookies from user's browser
+    _context.add_cookies(cookies)
     _page = _context.new_page()
 
-    # Navigate to Substack homepage first
+    # Navigate to Substack homepage
     print("Navigating to Substack...")
     _page.goto("https://substack.com", wait_until="load", timeout=60000)
+
+    # Wait for Cloudflare challenge to resolve
+    for i in range(12):  # Up to 60 seconds
+        if "Just a moment" in _page.content():
+            print(f"Waiting for Cloudflare... ({i+1})")
+            time.sleep(5)
+        else:
+            break
+
     time.sleep(2)  # Let page settle
 
-    # Check if we hit a Cloudflare challenge
-    if "Just a moment" in _page.content():
-        print("Waiting for Cloudflare challenge...")
-        time.sleep(10)  # Wait for Cloudflare to resolve
+    # Verify we're logged in
+    _page.goto("https://substack.com/home", wait_until="load", timeout=60000)
+    time.sleep(2)
 
+    if "Sign in" in _page.content() and _page.locator('a[href="/sign-in"]').count() > 0:
+        print("Warning: Cookies may be expired. Please log into Substack in your browser and try again.")
+        return False
+
+    print("Logged in to Substack.")
     return True
 
 
 def close_browser() -> None:
     """Close the browser."""
-    global _browser, _context, _page
+    global _playwright, _browser, _context, _page
     if _page:
         _page.close()
     if _context:
         _context.close()
     if _browser:
         _browser.close()
+    if _playwright:
+        _playwright.stop()
+    _playwright = None
     _browser = None
     _context = None
     _page = None
@@ -205,26 +239,111 @@ def get_user_subscriptions_browser(username: str) -> List[Newsletter]:
     return newsletters
 
 
-def get_publication_subscribers_browser(user_id: int, username: str = "", limit: int = 100) -> List[UserProfile]:
+def _get_author_handle(subdomain: str) -> Optional[str]:
+    """Get the author's handle from a publication subdomain."""
+    global _page
+
+    if not _page:
+        return None
+
+    try:
+        # Navigate to publication and extract author handle from page
+        _page.goto(f"https://{subdomain}.substack.com", wait_until="load", timeout=30000)
+        time.sleep(1)
+
+        # Look for author link in the page content
+        content = _page.content()
+        import re
+
+        # Try multiple patterns
+        patterns = [
+            r'substack\.com/@([a-zA-Z0-9_-]+)',  # Full URL pattern
+            r'href="/@([^"/?]+)"',               # Relative link pattern
+            r'"handle":"([^"]+)"',               # JSON data pattern
+        ]
+
+        for pattern in patterns:
+            match = re.search(pattern, content)
+            if match:
+                return match.group(1)
+    except Exception as e:
+        print(f"  Error getting author handle: {e}")
+
+    return None
+
+
+def get_publication_subscribers_browser(user_id: int, subdomain: str = "", limit: int = 100) -> List[UserProfile]:
     """
-    Get subscribers of a publication using the browser's authenticated fetch.
+    Get subscribers of a publication by navigating to the subscribers page.
 
     Args:
         user_id: The numeric user ID of the publication owner
-        username: The username/handle (not used, kept for compatibility)
+        subdomain: The publication subdomain (used to find author handle)
         limit: Maximum number of subscribers to fetch
 
     Returns:
         List of UserProfile objects for subscribers
     """
+    global _page
+
+    if not _page:
+        print("Browser not initialized")
+        return []
+
     cache_key = f"subscribers_browser:{user_id}:{limit}"
     cached = cache.get(cache_key)
     if cached:
         return [UserProfile(**p) for p in cached]
 
-    url = f"https://substack.com/api/v1/user/{user_id}/subscriber-lists"
-    print(f"  Fetching subscribers for user_id={user_id}...")
-    data = _fetch_api(url, {"lists": "subscribers"})
+    _rate_limit()
+
+    # Get author handle from subdomain
+    author_handle = None
+    if subdomain:
+        author_handle = _get_author_handle(subdomain)
+
+    if not author_handle:
+        print("  Could not find author handle")
+        return []
+
+    # Capture API response via interception
+    captured_data: List[Dict] = []
+
+    def handle_response(response):
+        if "subscriber-lists" in response.url and "substack.com/api" in response.url:
+            try:
+                if response.status == 200:
+                    captured_data.append(response.json())
+            except:
+                pass
+
+    _page.on("response", handle_response)
+
+    page_url = f"https://substack.com/@{author_handle}/subscribers"
+    print(f"  Fetching subscribers from @{author_handle}...")
+
+    try:
+        _page.goto(page_url, wait_until="networkidle", timeout=60000)
+
+        # Wait for Cloudflare if needed
+        for _ in range(6):
+            if "Just a moment" in _page.content():
+                time.sleep(5)
+            else:
+                break
+
+        time.sleep(2)  # Wait for API response
+
+    except Exception as e:
+        print(f"  Navigation error: {e}")
+
+    _page.remove_listener("response", handle_response)
+
+    if not captured_data:
+        print("  Could not fetch subscriber data")
+        return []
+
+    data = captured_data[0]
 
     if not data:
         print("  Could not fetch subscriber data")
