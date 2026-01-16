@@ -9,6 +9,7 @@ allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git add:*), Bash(git c
 ## Task
 1) Propose a good PR title + body (why, what, how tested).
 2) Create a single commit (or small set if justified).
+   - Always include the full `.claude/` folder in commits (learnings, settings, commands).
 3) Push branch.
 4) Open a PR with `gh pr create` using the title/body.
 
