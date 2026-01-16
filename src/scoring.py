@@ -140,3 +140,65 @@ def rank_matches(
     matches.sort()
 
     return matches
+
+
+def score_by_appearances(
+    candidates: dict,
+    min_overlap: int = 2,
+    require_bio: bool = False,
+    require_publication: bool = False,
+) -> List[Match]:
+    """
+    Score candidates by how many of user's newsletters they appear in.
+
+    This is the fast scoring method that doesn't require fetching each
+    candidate's full subscription list. We already know which of the user's
+    newsletters each candidate follows because we found them in those
+    newsletters' follower/subscriber lists.
+
+    Args:
+        candidates: Dict mapping user_id -> (UserProfile, List[Newsletter])
+                   where the list is newsletters the candidate appeared in
+        min_overlap: Minimum number of newsletters they must appear in
+        require_bio: Only include users with a bio
+        require_publication: Only include users with their own publication
+
+    Returns:
+        List of Match objects sorted by score (highest first)
+    """
+    matches = []
+
+    for user_id, (profile, appeared_in_newsletters) in candidates.items():
+        # Apply quality filters
+        if require_bio and not profile.bio:
+            continue
+        if require_publication and not profile.has_publication:
+            continue
+
+        # Apply minimum overlap filter
+        if len(appeared_in_newsletters) < min_overlap:
+            continue
+
+        # Compute nicheness-weighted score based on newsletters they appear in
+        score = sum(
+            compute_nicheness_weight(n.subscriber_count)
+            for n in appeared_in_newsletters
+        )
+
+        # Add quality bonus to score
+        quality_bonus = compute_quality_score(profile) * 0.1
+        final_score = score + quality_bonus
+
+        # Sort the shared newsletters by nicheness (smallest subscriber count first)
+        shared_sorted = sorted(appeared_in_newsletters, key=lambda n: n.subscriber_count)
+
+        matches.append(Match(
+            user=profile,
+            score=final_score,
+            shared_newsletters=shared_sorted,
+        ))
+
+    # Sort by score (descending)
+    matches.sort()
+
+    return matches
