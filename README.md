@@ -5,23 +5,24 @@ Find people with similar interests based on overlap in Substack newsletter subsc
 ## How It Works
 
 1. Takes your Substack username as input
-2. Fetches the newsletters you subscribe to
-3. For each newsletter, fetches other subscribers
-4. Gets each subscriber's own subscriptions
-5. Ranks matches by overlap, weighted by "nicheness" (smaller newsletters count more)
+2. Fetches your newsletter subscriptions
+3. Sorts newsletters by "nicheness" (fewest subscribers first)
+4. For each newsletter, fetches both subscribers AND followers
+5. Tracks which newsletters each person appears in
+6. Ranks matches by nicheness-weighted overlap score (shared niche newsletters count more)
 
 ## Setup
 
 ### 1. Install dependencies
 
 ```bash
-pip install playwright rich requests browser_cookie3
-python -m playwright install chromium
+pip install -r requirements.txt
+python -m playwright install firefox
 ```
 
 ### 2. Log into Substack
 
-Just log into Substack in Firefox, Chrome, or Safari. The tool automatically pulls cookies from your browser - no manual setup needed.
+Just log into Substack in Firefox, Chrome, or Safari. The tool automatically extracts cookies from your browser session - no manual setup needed.
 
 ## Usage
 
@@ -33,12 +34,13 @@ python -m src.main <username> [options]
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--max-newsletters` | 5 | Number of newsletters to scan |
-| `--subscribers-per-newsletter` | 50 | Subscribers to fetch per newsletter |
-| `--min-overlap` | 2 | Minimum shared subscriptions for a match |
+| `--max-newsletters` | 5 | Number of niche newsletters to scan |
+| `--subscribers-per-newsletter` | 200 | People to fetch per newsletter (subscribers + followers) |
+| `--min-overlap` | 2 | Minimum shared newsletters for a match |
 | `--require-bio` | false | Only show users with a bio |
 | `--require-publication` | false | Only show users with their own newsletter |
 | `--limit` | 20 | Maximum matches to display |
+| `--output` / `-o` | - | Save results to a file |
 
 ### Examples
 
@@ -77,5 +79,6 @@ This means:
 ## Limitations
 
 - Requires being subscribed to newsletters to see their subscriber lists
-- Rate limited to ~1 request/second to avoid being blocked
-- Opens a browser window (needed to bypass Cloudflare)
+- Rate limited with 8-15 second delays between requests (to appear human and avoid being blocked)
+- Opens a visible Firefox window (needed to bypass Cloudflare protection)
+- Uses 24-hour caching to reduce repeated API calls

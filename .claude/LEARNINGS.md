@@ -11,7 +11,7 @@
 - **Unofficial Python library** (`substack-api` on PyPI by NHagar) is more limited:
   - Has `user.get_subscriptions()`
   - Does NOT have comment fetching built-in
-- **Rate limit:** ~1 request/sec to be safe
+- **Rate limit:** 8-15 second delays between browser requests to avoid detection
 
 ## Substack Data Model
 
@@ -42,12 +42,13 @@ This captures engaged readers without needing a master user list.
 ## Cloudflare Bypass
 
 - Direct HTTP requests to Substack API get **403 Forbidden** due to Cloudflare
-- **Playwright with non-headless browser** bypasses this:
+- **Playwright with non-headless Firefox** bypasses this:
   - Use `headless=False` (Cloudflare detects headless mode)
-  - Add `--disable-blink-features=AutomationControlled` to avoid detection
-  - Load cookies from `~/.substack-cookies.json`
-  - Navigate to substack.com first to establish session
-  - Use `page.evaluate(fetch(...))` to make authenticated API calls
+  - Firefox works better than Chromium for Cloudflare compatibility
+  - Auto-extract cookies from user's Firefox/Chrome/Safari via `browser_cookie3` (no manual cookie file needed)
+  - Uses `playwright-stealth` for additional bot detection evasion
+  - Rate limiting: 8-15 second random delays between requests to appear human
+  - Intercepts API responses when navigating to subscribers/followers pages
 
 ## Subscriber Lists API
 
