@@ -37,3 +37,6 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Output files
+results*.txt
