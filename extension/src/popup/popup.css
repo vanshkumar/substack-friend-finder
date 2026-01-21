@@ -147,6 +147,11 @@ button:disabled {
   margin-bottom: 12px;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
 .results-header h2 {
   font-size: 16px;
   font-weight: 600;

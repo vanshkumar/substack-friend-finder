@@ -34,15 +34,20 @@ extension/
 │   │   └── injected.js     # Core logic (runs in page context with cookies)
 │   └── background/         # Service worker
 │       └── service-worker.js
-└── assets/                 # Icons (TODO: add before publishing)
+└── assets/                 # Extension icons
+    ├── icon16.png
+    ├── icon48.png
+    └── icon128.png
 ```
 
-## TODO Before Publishing
+## Chrome Web Store Checklist
 
-- [ ] Create extension icons (16x16, 48x48, 128x128)
+- [x] Create extension icons (16x16, 48x48, 128x128)
+- [x] Write privacy policy (PRIVACY.md)
 - [ ] Add promotional images for Chrome Web Store
-- [ ] Write privacy policy
-- [ ] Test on multiple accounts
+- [ ] Take screenshots for store listing
+- [ ] Create Chrome Web Store developer account ($5)
+- [ ] Submit for review
 
 ## How It Works
 
