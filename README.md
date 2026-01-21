@@ -2,6 +2,20 @@
 
 Find people with similar interests based on overlap in Substack newsletter subscriptions.
 
+## Browser Extension (Recommended)
+
+The easiest way to use this tool is via the **Chrome extension** - no installation or technical setup required.
+
+1. Load the extension from the `extension/` folder (see [extension/README.md](extension/README.md))
+2. Go to [substack.com](https://substack.com) and log in
+3. Click the extension icon, enter your username, and click "Find Friends"
+
+The extension scans all your subscribed newsletters and finds people with overlapping reading interests. Results are stored locally in your browser.
+
+## CLI Tool
+
+For power users who want more control, there's also a command-line tool.
+
 ## How It Works
 
 1. Takes your Substack username as input
