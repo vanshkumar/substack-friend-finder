@@ -21,6 +21,10 @@ const matchCount = document.getElementById('match-count');
 const resultsList = document.getElementById('results-list');
 const rescanBtn = document.getElementById('rescan-btn');
 const cancelBtn = document.getElementById('cancel-btn');
+const exportBtn = document.getElementById('export-btn');
+
+// Store all matches for export (not just displayed ones)
+let allMatches = [];
 
 // State
 let currentTabId = null;
@@ -94,6 +98,11 @@ cancelBtn.addEventListener('click', async () => {
   }
 
   showSection('form');
+});
+
+exportBtn.addEventListener('click', () => {
+  if (allMatches.length === 0) return;
+  exportMatchesToCSV(allMatches);
 });
 
 usernameInput.addEventListener('keypress', (e) => {
@@ -216,6 +225,8 @@ async function handleError(message) {
 }
 
 function displayResults(matches, timestamp) {
+  // Store all matches for export
+  allMatches = matches;
   matchCount.textContent = `(${matches.length})`;
 
   if (matches.length === 0) {
@@ -285,6 +296,51 @@ function getTimeAgo(date) {
   if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
   return `${Math.floor(seconds / 86400)} days ago`;
+}
+
+function exportMatchesToCSV(matches) {
+  // CSV header
+  const headers = ['Rank', 'Name', 'Username', 'Score', 'Shared Newsletters', 'Bio', 'Profile URL', 'Has Publication', 'Publication URL'];
+
+  // CSV rows
+  const rows = matches.map((match, index) => {
+    const { user, score, sharedNewsletters } = match;
+    return [
+      index + 1,
+      user.name || '',
+      user.username || '',
+      score.toFixed(3),
+      sharedNewsletters.map(n => n.name).join('; '),
+      (user.bio || '').replace(/[\n\r]+/g, ' '),
+      `https://substack.com/@${user.username}`,
+      user.hasPublication ? 'Yes' : 'No',
+      user.publicationUrl || ''
+    ];
+  });
+
+  // Escape CSV values
+  const escapeCSV = (value) => {
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  };
+
+  // Build CSV content
+  const csvContent = [
+    headers.map(escapeCSV).join(','),
+    ...rows.map(row => row.map(escapeCSV).join(','))
+  ].join('\n');
+
+  // Create and download file
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `substack-matches-${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 // Storage functions
