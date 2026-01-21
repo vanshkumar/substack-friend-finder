@@ -40,3 +40,9 @@ htmlcov/
 
 # Output files
 results*.txt
+
+# Extension build output
+extension/dist/
+extension/node_modules/
+*.crx
+*.pem
