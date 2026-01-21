@@ -17,20 +17,21 @@ A Chrome extension that helps you find people who share your niche reading inter
 2. Click the extension icon
 3. Enter your Substack username
 4. Click "Find Friends"
-5. Wait 3-5 minutes while it scans your niche newsletters
+5. Keep the Substack tab open while scanning (takes 8-15 seconds per newsletter page)
 
 ### Project Structure
 
 ```
 extension/
-├── manifest.json           # Chrome extension config
+├── manifest.json           # Chrome extension config (Manifest V3)
 ├── src/
 │   ├── popup/              # Extension popup UI
 │   │   ├── popup.html
 │   │   ├── popup.js
 │   │   └── popup.css
-│   ├── content/            # Content script (runs on substack.com)
-│   │   └── content.js
+│   ├── content/            # Scripts running on substack.com
+│   │   ├── content.js      # Bridge between popup and injected script
+│   │   └── injected.js     # Core logic (runs in page context with cookies)
 │   └── background/         # Service worker
 │       └── service-worker.js
 └── assets/                 # Icons (TODO: add before publishing)
@@ -45,11 +46,13 @@ extension/
 
 ## How It Works
 
-1. Content script runs on `substack.com` pages
+1. Injected script runs in the page context on `substack.com` (with cookie access)
 2. When you click "Find Friends", it:
-   - Fetches your subscriptions (public)
-   - Sorts by subscriber count (nichest first)
-   - For each niche newsletter, fetches followers/subscribers (authenticated)
-   - Scores people by how many of your niche newsletters they also follow
-3. Results are cached locally in the browser
-4. No data is ever sent to any external server
+   - Fetches your subscriptions via public profile API
+   - Sorts newsletters by subscriber count (nichest first)
+   - For each newsletter, calls the subscriber-lists API for subscribers AND followers
+   - Tracks which newsletters each person appears in
+   - Scores people using nicheness-weighted overlap (shared niche newsletters count more)
+   - Filters to people with 2+ shared newsletters
+3. Progress and results are saved to `chrome.storage.local`
+4. No data is ever sent to any external server - everything stays in your browser
