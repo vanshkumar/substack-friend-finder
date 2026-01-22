@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Substack Friend Finder</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Friend Finder</h1>
+
+    <div id="form-section">
+      <p class="subtitle">Find people who share your niche reading interests</p>
+      <input
+        type="text"
+        id="username"
+        placeholder="Your Substack username"
+        autocomplete="off"
+      >
+      <button id="start-btn">Find Friends</button>
+      <p id="error-msg" class="error hidden"></p>
+    </div>
+
+    <div id="progress-section" class="hidden">
+      <div class="progress-header">
+        <span id="progress-status">Starting...</span>
+      </div>
+      <div class="progress-detail">
+        <span id="progress-detail"></span>
+      </div>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <p class="progress-hint">Keep this tab open while scanning</p>
+      <button id="cancel-btn" class="small-btn cancel-btn">Cancel Scan</button>
+    </div>
+
+    <div id="results-section" class="hidden">
+      <div class="results-header">
+        <h2>Matches <span id="match-count"></span></h2>
+        <div class="header-buttons">
+          <button id="export-btn" class="small-btn">Export CSV</button>
+          <button id="rescan-btn" class="small-btn">Scan Again</button>
+        </div>
+      </div>
+      <div id="results-list"></div>
+    </div>
+
+    <div id="not-substack" class="hidden">
+      <p>Please navigate to <a href="https://substack.com" target="_blank">substack.com</a> and make sure you're logged in.</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

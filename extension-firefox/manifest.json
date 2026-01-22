@@ -1,0 +1,47 @@
+{
+  "manifest_version": 2,
+  "name": "Substack Friend Finder",
+  "version": "1.0.0",
+  "description": "Find people who share your niche reading interests on Substack",
+  "homepage_url": "https://github.com/vanshkumar/substack-friend-finder",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "substack-friend-finder@vanshkumar",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["personallyIdentifyingInfo"],
+        "optional": []
+      }
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "*://*.substack.com/*"
+  ],
+  "browser_action": {
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "48": "assets/icon48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.substack.com/*", "*://substack.com/*"],
+      "js": ["src/content/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    "src/content/injected.js"
+  ],
+  "background": {
+    "scripts": ["src/background/background.js"]
+  }
+}
