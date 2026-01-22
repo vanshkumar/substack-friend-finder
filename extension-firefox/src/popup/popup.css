@@ -1,0 +1,239 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background: #fff;
+  min-width: 360px;
+  max-width: 400px;
+}
+
+.container {
+  padding: 16px;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #ff6719;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 16px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: #ff6719;
+}
+
+button {
+  width: 100%;
+  padding: 10px 16px;
+  background: #ff6719;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #e55a14;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.small-btn {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+  background: #f5f5f5;
+  color: #333;
+}
+
+.small-btn:hover {
+  background: #e5e5e5;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* Progress Section */
+#progress-section {
+  text-align: center;
+}
+
+.progress-header {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.progress-detail {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 12px;
+  min-height: 20px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #ff6719;
+  width: 0%;
+  transition: width 0.3s;
+}
+
+.progress-hint {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 12px;
+}
+
+.cancel-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #666;
+}
+
+.cancel-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
+}
+
+/* Results Section */
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.results-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#match-count {
+  font-weight: normal;
+  color: #666;
+}
+
+#results-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.match-card {
+  padding: 12px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.match-card:hover {
+  border-color: #ff6719;
+}
+
+.match-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.match-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eee;
+  object-fit: cover;
+}
+
+.match-name {
+  font-weight: 500;
+}
+
+.match-username {
+  font-size: 13px;
+  color: #666;
+}
+
+.match-score {
+  margin-left: auto;
+  background: #fff3e6;
+  color: #ff6719;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.match-shared {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.match-bio {
+  font-size: 12px;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Not on Substack */
+#not-substack {
+  text-align: center;
+  padding: 20px;
+}
+
+#not-substack a {
+  color: #ff6719;
+}
