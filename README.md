@@ -4,9 +4,17 @@ Find people with similar interests based on overlap in Substack newsletter subsc
 
 ## Browser Extension (Recommended)
 
-The easiest way to use this tool is via the **Chrome extension** - no installation or technical setup required.
+The easiest way to use this tool is via the browser extension - no installation or technical setup required.
+
+### Chrome
 
 1. Load the extension from the `extension/` folder (see [extension/README.md](extension/README.md))
+2. Go to [substack.com](https://substack.com) and log in
+3. Click the extension icon, enter your username, and click "Find Friends"
+
+### Firefox
+
+1. Load the extension from the `extension-firefox/` folder (see [extension-firefox/README.md](extension-firefox/README.md))
 2. Go to [substack.com](https://substack.com) and log in
 3. Click the extension icon, enter your username, and click "Find Friends"
 

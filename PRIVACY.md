@@ -1,6 +1,6 @@
 # Privacy Policy for Substack Friend Finder
 
-**Last Updated:** January 2025
+**Last Updated:** January 2026
 
 ## Overview
 
@@ -14,7 +14,7 @@ Substack Friend Finder is a browser extension that helps you discover people wit
 - Subscriber and follower lists of newsletters you're subscribed to
 
 ### What We Store
-All data is stored **locally in your browser** using Chrome's storage API:
+All data is stored **locally in your browser** using the browser's storage API:
 - Your scan results (matched profiles)
 - Scan progress (so you can resume if interrupted)
 
@@ -31,7 +31,7 @@ All data is stored **locally in your browser** using Chrome's storage API:
 
 ## Data Storage
 
-- All data is stored locally in your browser using `chrome.storage.local`
+- All data is stored locally in your browser using the browser's local storage API
 - Data persists until you clear your browser data or uninstall the extension
 - You can clear stored data by uninstalling and reinstalling the extension
 
