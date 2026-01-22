@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from playwright.sync_api import sync_playwright, Browser, BrowserContext, Page, Playwright
-from playwright_stealth import stealth_sync
 
 # Try to import undetected_chromedriver for Cloudflare bypass
 try:
