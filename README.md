@@ -8,13 +8,13 @@ The easiest way to use this tool is via the browser extension - no installation 
 
 ### Chrome
 
-1. Load the extension from the `extension/` folder (see [extension/README.md](extension/README.md))
+1. Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/ejiocllfidbjkkhjdbbmgcmocjcoakdi)
 2. Go to [substack.com](https://substack.com) and log in
 3. Click the extension icon, enter your username, and click "Find Friends"
 
 ### Firefox
 
-1. Load the extension from the `extension-firefox/` folder (see [extension-firefox/README.md](extension-firefox/README.md))
+1. Install from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/substack-friend-finder/)
 2. Go to [substack.com](https://substack.com) and log in
 3. Click the extension icon, enter your username, and click "Find Friends"
 
